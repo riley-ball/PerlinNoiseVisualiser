@@ -1,8 +1,18 @@
 import tkinter as tk
 import math
 import view
+import random
 
-Game_Window = "1280x384"
+Game_Window = "1536x960"
+
+
+class PerlinNoise(object):
+    """Object that represents properties of the perlin noise to be drawn"""
+
+    def __init__(self, master):
+        self._master = master
+        self.seed_length = 128
+        self.seed = [random.random() for i in range(self.seed_length)]
 
 
 class App(object):
@@ -18,9 +28,10 @@ class App(object):
         self._master = master
         self._canvas = tk.Canvas(self._master)
         self._canvas.pack()
-        self._view = view.AppView(self._canvas)
+        self._perlin_noise = PerlinNoise(self._master)
+        self._view = view.AppView(self._canvas, self._perlin_noise)
         self._view.pack()
-        self._view.create_graph()
+        self._view.create_seed_graph()
 
 
 def main():
@@ -28,9 +39,6 @@ def main():
     # root.geometry(Game_Window)
     app = App(root)
     root.title("PerlinNoiseVisualiser")
-    root.lift()
-    root.attributes('-topmost', True)
-    root.after_idle(root.attributes, '-topmost', False)
     root.mainloop()
 
 
