@@ -40,6 +40,11 @@ class AppView(tk.Canvas):
                              fill="black", tag="seed_graph", width=2)
 
         # Divider
-
         self.create_line(20, height-384+20, width+20, height-384+20,
                          fill="black", tag="seed_graph", width=2)
+
+        # # Horizontal and Vertical axes
+        # self.create_line(40, height, width+1, height,
+        #                  fill="black", tag="seed_graph", width=2)
+        # self.create_line(40, height, 40, height-384+39,
+        #                  fill="black", tag="seed_graph", width=2)
