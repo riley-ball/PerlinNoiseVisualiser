@@ -11,8 +11,9 @@ class PerlinNoise(object):
 
     def __init__(self, master):
         self._master = master
-        self.seed_length = 128
-        self.seed = [random.random() for i in range(self.seed_length)]
+        self.seed_length = 16
+        self.seed = [round(random.random(), 2)
+                     for i in range(self.seed_length)]
 
 
 class App(object):
