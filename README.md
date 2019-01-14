@@ -9,4 +9,4 @@ PerlinNoiseVisualiser is an application that visually describes the process of a
 - 'Right' and 'Left' to increase/decrease octaves respectively
 - 'Up'and'Down' to increase/decrease seed length respectively
 
-![alt tag](https://user-images.githubusercontent.com/42449953/51112844-cba96180-184b-11e9-92b2-3bede2b83c16.png)
+![alt tag](https://user-images.githubusercontent.com/42449953/51113361-7706e600-184d-11e9-9448-e41c047307e5.png)
