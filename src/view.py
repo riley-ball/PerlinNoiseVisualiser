@@ -104,7 +104,7 @@ class AppView(tk.Canvas):
         # Draw upper images
         for i in range(len(self._images)):
             self.create_image(left_space/2, end_upper_vert -
-                              (dh_upper*i) - dh_upper/2, image=self._images[i])
+                              (dh_upper*i) - dh_upper/2, image=self._images[i], tag="seed_graph")
 
         # Horizontal and Vertical axes for upper
         self.create_line(left_space, end_upper_vert, end_width+1, end_upper_vert,
