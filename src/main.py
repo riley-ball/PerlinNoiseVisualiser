@@ -9,8 +9,8 @@ class PerlinNoise(object):
 
     def __init__(self, master):
         self._master = master
-        self.seed_length = 512
-        self.octave_count = 9
+        self.seed_length = 256
+        self.octave_count = 8
 
     def generate_seed(self):
         return [random.random() for i in range(int(self.seed_length))]
