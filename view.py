@@ -1,6 +1,7 @@
 import tkinter as tk
 import math
 from main import Game_Window
+import random
 
 
 class AppView(tk.Canvas):
@@ -58,7 +59,7 @@ class AppView(tk.Canvas):
             "x")[0])/2, upper_height+60, text="Generated Seed", font=("Purisa", 25))
 
         octave_count = 0
-        num_octaves = 5
+        num_octaves = 7
         multiplier_sum = 0
         for i in range(num_octaves):
             multiplier_sum += 1/(2**i)
@@ -66,15 +67,18 @@ class AppView(tk.Canvas):
         old_output = []
 
         while octave_count != num_octaves:
+            fill = "#" + "%06x" % random.randint(0, 0xFFFFFF)
             generator = self._seed_length / (2**octave_count)
             plots = []
             new_output = []
             for i in range(self._seed_length):
                 if i % generator == 0:
-                    value = 1/(2**octave_count) * self._seed[i]
+                    value = (1/(2**octave_count) *
+                             self._seed[i]) / multiplier_sum
                     plots.append(value)
                 elif octave_count == 0:
-                    value = 1/(2**octave_count) * self._seed[0]
+                    value = (1/(2**octave_count) *
+                             self._seed[0]) / multiplier_sum
                     plots.append(value)
             # wrap around
             plots.append(plots[0])
@@ -91,7 +95,7 @@ class AppView(tk.Canvas):
                         if skip_count == 0:
                             start_point = plots.pop(0)
                             new_value = (
-                                start_point + old_output.pop(0)) / multiplier_sum
+                                start_point + old_output.pop(0))
                             new_output.append(new_value)
                         else:
                             if point_count == num_points-1:
@@ -99,7 +103,7 @@ class AppView(tk.Canvas):
                             else:
                                 dv = (plots[0]-start_point)/generator
                             new_value = (start_point + dv *
-                                         skip_count + old_output.pop(0)) / multiplier_sum
+                                         skip_count + old_output.pop(0))
                             new_output.append(new_value)
                         skip_count += 1
                     skip_count = 0
@@ -112,7 +116,7 @@ class AppView(tk.Canvas):
             for x in range(len(new_output)):
                 if x != len(new_output)-1:
                     self.create_line(40+dx*x, upper_height-new_output[x]*upper_vert, 40+dx*(
-                        x+1), upper_height-new_output[x+1]*upper_vert, tag="seed_graph", fill="blue", width=1.3)
+                        x+1), upper_height-new_output[x+1]*upper_vert, tag="seed_graph", width=1.3, fill=fill)
 
             octave_count += 1
             old_output = new_output
