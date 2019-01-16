@@ -117,7 +117,7 @@ class AppView(tk.Canvas):
         self.create_text(self._width/2, end_upper_vert+top_space,
                          text="Generated Seed", font=text_font, fill=seed_fill, tag="seed_graph")
 
-        self.create_text(self._width/2, top_space, text="Generated Terrain",
+        self.create_text(self._width/2, top_space/2, text="Generated Terrain",
                          font=text_font, fill=seed_fill, tag="seed_graph")
 
         # Draw terrain to screen
@@ -125,14 +125,15 @@ class AppView(tk.Canvas):
         multiplier_sum = 0
         for i in range(num_octaves):
             multiplier_sum += 1/(2**i)
-        old_output = []
+        octave_generations = []
+        old_generation = []
 
         while octave_count != num_octaves:
             # fill = "#" + "%06x" % random.randint(0, 0xFFFFFF)
             fill = seed_fill
             generator = seed_length / (2**octave_count)
             plots = []
-            new_output = []
+            new_generation = []
             for i in range(seed_length):
                 if i % generator == 0:
                     value = (1/(2**octave_count) *
@@ -146,7 +147,7 @@ class AppView(tk.Canvas):
             plots.append(plots[0])
 
             if octave_count == 0:
-                new_output = [plots[0]/multiplier_sum] * seed_length
+                new_generation = [plots[0]] * seed_length
             else:
                 num_points = len(plots)
                 num_to_skip = (seed_length/(num_points-1))-1
@@ -157,29 +158,31 @@ class AppView(tk.Canvas):
                         if skip_count == 0:
                             start_point = plots.pop(0)
                             new_value = (
-                                start_point + old_output.pop(0))
-                            new_output.append(new_value)
+                                start_point + old_generation.pop(0))
+                            new_generation.append(new_value)
                         else:
                             if point_count == num_points-1:
                                 dv = (plots[0]-start_point)/(generator-1)
                             else:
                                 dv = (plots[0]-start_point)/generator
                             new_value = (start_point + dv *
-                                         skip_count + old_output.pop(0))
-                            new_output.append(new_value)
+                                         skip_count + old_generation.pop(0))
+                            new_generation.append(new_value)
                         skip_count += 1
                     skip_count = 0
                     point_count += 1
 
-            dx = length_horiz/(len(new_output)-1)
-
-            for x in range(len(new_output)):
-                if x != len(new_output)-1:
-                    self.create_line(left_space+dx*x, end_upper_vert-new_output[x]*length_upper_vert, left_space+dx*(
-                        x+1), end_upper_vert-new_output[x+1]*length_upper_vert, tag="seed_graph", width=1.5, fill=fill)
-
             octave_count += 1
-            old_output = new_output
+            old_generation = [i for i in new_generation]
+            octave_generations.append(new_generation)
+        dx = length_horiz/(len(new_generation)-1)
+        octave_generations = [[i for i in octave]
+                              for octave in octave_generations]
+        for octave in octave_generations:
+            for x in range(seed_length):
+                if x != seed_length-1:
+                    self.create_line(left_space+dx*x, end_upper_vert-octave[x]*length_upper_vert, left_space+dx*(
+                        x+1), end_upper_vert-octave[x+1]*length_upper_vert, tag="seed_graph", width=1.5, fill=fill)
 
     def refresh_view(self, event):
         if event.keysym == "space":
