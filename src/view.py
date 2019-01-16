@@ -117,69 +117,40 @@ class AppView(tk.Canvas):
         self.create_text(self._width/2, end_upper_vert+top_space,
                          text="Generated Seed", font=text_font, fill=seed_fill, tag="seed_graph")
 
-        self.create_text(self._width/2, top_space, text="Generated Terrain",
+        self.create_text(self._width/2, top_space/2, text="Generated Terrain",
                          font=text_font, fill=seed_fill, tag="seed_graph")
 
         # Draw terrain to screen
-        octave_count = 0
-        multiplier_sum = 0
-        for i in range(num_octaves):
-            multiplier_sum += 1/(2**i)
-        old_output = []
+        total_octaves = int(math.log10(seed_length)/math.log10(2))
+        scale_acc = 0
+        for i in range(total_octaves):
+            scale_acc += 1/(2**i)
+        print(scale_acc)
+        octave_generations = [0] * seed_length
+        fill = seed_fill
 
-        while octave_count != num_octaves:
-            # fill = "#" + "%06x" % random.randint(0, 0xFFFFFF)
-            fill = seed_fill
-            generator = seed_length / (2**octave_count)
-            plots = []
-            new_output = []
-            for i in range(seed_length):
-                if i % generator == 0:
-                    value = (1/(2**octave_count) *
-                             self._seed[i]) / multiplier_sum
-                    plots.append(value)
-                elif octave_count == 0:
-                    value = (1/(2**octave_count) *
-                             self._seed[0]) / multiplier_sum
-                    plots.append(value)
-            # wrap around
-            plots.append(plots[0])
+        scale = 1
+        for octave in range(total_octaves):
+            pitch = int(seed_length / 2**(octave+1))
+            for x in range(seed_length):
+                sample1 = int(int((x / pitch)) * pitch)
+                sample2 = int(int((sample1 + pitch)) % seed_length)
 
-            if octave_count == 0:
-                new_output = [plots[0]/multiplier_sum] * seed_length
-            else:
-                num_points = len(plots)
-                num_to_skip = (seed_length/(num_points-1))-1
-                point_count = 1
-                skip_count = 0
-                while point_count < num_points:
-                    while skip_count <= num_to_skip:
-                        if skip_count == 0:
-                            start_point = plots.pop(0)
-                            new_value = (
-                                start_point + old_output.pop(0))
-                            new_output.append(new_value)
-                        else:
-                            if point_count == num_points-1:
-                                dv = (plots[0]-start_point)/(generator-1)
-                            else:
-                                dv = (plots[0]-start_point)/generator
-                            new_value = (start_point + dv *
-                                         skip_count + old_output.pop(0))
-                            new_output.append(new_value)
-                        skip_count += 1
-                    skip_count = 0
-                    point_count += 1
+                pos = (x-sample1) / pitch
+                sample = (1-pos) * \
+                    self._seed[sample1] + pos * self._seed[sample2]
 
-            dx = length_horiz/(len(new_output)-1)
+                noise = sample * scale
+                octave_generations[x] += noise
 
-            for x in range(len(new_output)):
-                if x != len(new_output)-1:
-                    self.create_line(left_space+dx*x, end_upper_vert-new_output[x]*length_upper_vert, left_space+dx*(
-                        x+1), end_upper_vert-new_output[x+1]*length_upper_vert, tag="seed_graph", width=1.5, fill=fill)
+            dx = length_horiz/(seed_length-1)
+            draw_generation = [i/scale_acc for i in octave_generations]
+            for x in range(seed_length):
+                if x != seed_length-1:
+                    self.create_line(left_space+dx*x, end_upper_vert-draw_generation[x]*length_upper_vert, left_space+dx*(
+                        x+1), end_upper_vert-draw_generation[x+1]*length_upper_vert, tag="seed_graph", width=1.5, fill=fill)
 
-            octave_count += 1
-            old_output = new_output
+            scale /= 2
 
     def refresh_view(self, event):
         if event.keysym == "space":
