@@ -7,10 +7,8 @@ from PIL import Image, ImageTk
 
 class AppView(tk.Canvas):
 
-    def __init__(self, master, perlin_noise, width, height):
+    def __init__(self, master, width, height):
         self._master = master
-        self._perlin_noise = perlin_noise
-        self._seed = perlin_noise.generate_seed()
         # Width of screen
         self._width = width
         # Height of screen
@@ -30,146 +28,129 @@ class AppView(tk.Canvas):
         self._images.append(ImageTk.PhotoImage(Image.open(
             "./images/moon.png").resize((70, 70), Image.ANTIALIAS)))
 
-    def create_seed_graph(self):
-        num_octaves = self._perlin_noise.get_octave_count()
-        seed_length = int(self._perlin_noise.get_seed_length())
-        props_fill = "sky blue"
-        seed_fill = "tan2"
-        text_font = Font(family="Consolas", size=18)
+        self._props_fill = "sky blue"
+        self._seed_fill = "tan2"
+        self._text_font = Font(family="Consolas", size=18)
+
+        '''
+        Variables for measurements for view
+        '''
 
         # Spacing from right and left
-        right_space = 40
-        left_space = 80
+        self._right_space = 40
+        self._left_space = 80
 
         # Spacing from top and bottom and divide
-        top_space = 40
-        bottom_space = 80
-        divide_space = 80
+        self._top_space = 40
+        self._bottom_space = 80
+        self._divide_space = 80
 
         # Length of lower vert
-        length_lower_vert = (
-            self._height-(top_space+bottom_space+divide_space))/4
+        self._length_lower_vert = (
+            self._height-(self._top_space+self._bottom_space+self._divide_space))/4
         # Length of upper vert
-        length_upper_vert = 3 * \
-            ((self._height-(top_space+bottom_space+divide_space))/4)
+        self._length_upper_vert = 3 * \
+            ((self._height-(self._top_space+self._bottom_space+self._divide_space))/4)
         # Length of horizontal width
-        length_horiz = self._width-(left_space+right_space)
+        self._length_horiz = self._width-(self._left_space+self._right_space)
 
         # Start and end of width pos
-        start_width = self._width-(length_horiz+right_space)
-        end_width = self._width-right_space
+        self._start_width = self._width-(self._length_horiz+self._right_space)
+        self._end_width = self._width-self._right_space
 
         # Start and end of upper pos
-        start_upper_vert = self._height - \
-            (bottom_space+length_lower_vert+divide_space+length_upper_vert)
-        end_upper_vert = self._height - \
-            (bottom_space+length_lower_vert+divide_space)
+        self._start_upper_vert = self._height - \
+            (self._bottom_space+self._length_lower_vert +
+             self._divide_space+self._length_upper_vert)
+        self._end_upper_vert = self._height - \
+            (self._bottom_space+self._length_lower_vert+self._divide_space)
 
         # Start and end of lower pos
-        start_lower_vert = self._height-(bottom_space+length_lower_vert)
-        end_lower_vert = self._height-bottom_space
+        self._start_lower_vert = self._height - \
+            (self._bottom_space+self._length_lower_vert)
+        self._end_lower_vert = self._height-self._bottom_space
 
         # Spacing between horizontal markers
-        dw = length_horiz/(seed_length-1)
+        self._dw_markers = self._length_horiz/5
         # Spacing between vertical markers
-        dh_lower = length_lower_vert/5
-        dh_upper = length_upper_vert/5
+        self._dh_lower = self._length_lower_vert/5
+        self._dh_upper = self._length_upper_vert/5
+
+    def draw_graph(self, perlin_noise):
+        self.delete("graph")
 
         # Horizontal and Vertical axes for lower
-        self.create_line(left_space, end_lower_vert, end_width+1, end_lower_vert,
-                         fill=props_fill, tag="seed_graph", width=2)
-        self.create_line(left_space, start_lower_vert-1, left_space, end_lower_vert,
-                         fill=props_fill, tag="seed_graph", width=2)
+        self.create_line(self._left_space, self._end_lower_vert, self._end_width+1, self._end_lower_vert,
+                         fill=self._props_fill, tag="graph", width=2)
+        self.create_line(self._left_space, self._start_lower_vert-1, self._left_space, self._end_lower_vert,
+                         fill=self._props_fill, tag="graph", width=2)
 
         # Horizontal and Vertical markers for lower
-        for x in range(seed_length):
-            self.create_line(left_space+dw*x, end_lower_vert, left_space+dw*x, end_lower_vert+5,
-                             fill=props_fill, tag="seed_graph", width=2)
-            # Draw seed to screen
-            if x != seed_length-1:
-                self.create_line(
-                    left_space+dw*x, end_lower_vert-self._seed[x]*length_lower_vert, left_space+dw*(x+1), end_lower_vert-self._seed[x+1]*length_lower_vert, tag="seed_graph", fill=seed_fill, width=1.5)
+        for x in range(6):
+            self.create_line(self._left_space+self._dw_markers*x, self._end_lower_vert, self._left_space+self._dw_markers*x, self._end_lower_vert+5,
+                             fill=self._props_fill, tag="graph", width=2)
         for y in range(6):
-            self.create_line(left_space, end_lower_vert-dh_lower*y, left_space-5, end_lower_vert-dh_lower*y,
-                             fill=props_fill, tag="seed_graph", width=2)
+            self.create_line(self._left_space, self._end_lower_vert-self._dh_lower*y, self._left_space-5, self._end_lower_vert-self._dh_lower*y,
+                             fill=self._props_fill, tag="graph", width=2)
 
         # Horizontal and Vertical markers for upper
-        for x in range(seed_length):
-            self.create_line(left_space+dw*x, end_upper_vert, left_space+dw*x, end_upper_vert+5,
-                             fill=props_fill, tag="seed_graph", width=2)
+        for x in range(6):
+            self.create_line(self._left_space+self._dw_markers*x, self._end_upper_vert, self._left_space+self._dw_markers*x, self._end_upper_vert+5,
+                             fill=self._props_fill, tag="graph", width=2)
         for y in range(6):
-            self.create_line(left_space, end_upper_vert-dh_upper*y, left_space-5, end_upper_vert-dh_upper*y,
-                             fill=props_fill, tag="seed_graph", width=2)
+            self.create_line(self._left_space, self._end_upper_vert-self._dh_upper*y, self._left_space-5, self._end_upper_vert-self._dh_upper*y,
+                             fill=self._props_fill, tag="graph", width=2)
 
         # Draw upper images
         for i in range(len(self._images)):
-            self.create_image(left_space/2, end_upper_vert -
-                              (dh_upper*i) - dh_upper/2, image=self._images[i], tag="seed_graph")
+            self.create_image(self._left_space/2, self._end_upper_vert -
+                              (self._dh_upper*i) - self._dh_upper/2, image=self._images[i], tag="graph")
 
         # Horizontal and Vertical axes for upper
-        self.create_line(left_space, end_upper_vert, end_width+1, end_upper_vert,
-                         fill=props_fill, tag="seed_graph", width=2)
-        self.create_line(left_space, start_upper_vert-1, left_space, end_upper_vert,
-                         fill=props_fill, tag="seed_graph", width=2)
+        self.create_line(self._left_space, self._end_upper_vert, self._end_width+1, self._end_upper_vert,
+                         fill=self._props_fill, tag="graph", width=2)
+        self.create_line(self._left_space, self._start_upper_vert-1, self._left_space, self._end_upper_vert,
+                         fill=self._props_fill, tag="graph", width=2)
 
         # Text to screen
 
-        self.create_text(self._width/2, end_upper_vert+top_space,
-                         text="Generated Seed", font=text_font, fill=seed_fill, tag="seed_graph")
+        self.create_text(self._width/2, self._end_upper_vert+self._top_space,
+                         text="Generated Seed", font=self._text_font, fill=self._seed_fill, tag="graph")
 
-        self.create_text(self._width/2, top_space/2, text="Generated Terrain",
-                         font=text_font, fill=seed_fill, tag="seed_graph")
+        self.create_text(self._width/2, self._top_space/2, text="Generated Terrain",
+                         font=self._text_font, fill=self._seed_fill, tag="graph")
+
+    def refresh_view(self, perlin_noise):
+        seed_length = perlin_noise.get_seed_length()
+        seed = perlin_noise.get_seed()
+        generations = perlin_noise.get_octaves()
+        num_octaves = perlin_noise.get_octave_count()
+
+        self.draw_graph(perlin_noise)
+        self.draw_seed(seed_length, seed)
+        self.draw_terrain(seed_length, generations, num_octaves)
+
+    def draw_seed(self, seed_length, seed):
+        self._dw_seed = self._length_horiz/(seed_length-1)
+        self.delete("seed")
+
+        # Draw seed to screen
+        for x in range(seed_length):
+            if x != seed_length-1:
+                self.create_line(
+                    self._left_space+self._dw_seed*x, self._end_lower_vert -
+                    seed[x]*self._length_lower_vert,
+                    self._left_space+self._dw_seed*(x+1), self._end_lower_vert -
+                    seed[x+1]*self._length_lower_vert,
+                    tag="seed", fill=self._seed_fill, width=1.5)
+
+    def draw_terrain(self, seed_length, generations, num_octaves):
+        dx = self._length_horiz/(seed_length-1)
+        self.delete("terrain")
 
         # Draw terrain to screen
-        total_octaves = int(math.log10(seed_length)/math.log10(2))
-        scale_acc = 0
-        for i in range(total_octaves):
-            scale_acc += 1/(2**i)
-        print(scale_acc)
-        octave_generations = [0] * seed_length
-        fill = seed_fill
-
-        scale = 1
-        for octave in range(total_octaves):
-            pitch = int(seed_length / 2**(octave+1))
-            for x in range(seed_length):
-                sample1 = int(int((x / pitch)) * pitch)
-                sample2 = int(int((sample1 + pitch)) % seed_length)
-
-                pos = (x-sample1) / pitch
-                sample = (1-pos) * \
-                    self._seed[sample1] + pos * self._seed[sample2]
-
-                noise = sample * scale
-                octave_generations[x] += noise
-
-            dx = length_horiz/(seed_length-1)
-            draw_generation = [i/scale_acc for i in octave_generations]
+        for octave in range(num_octaves):
             for x in range(seed_length):
                 if x != seed_length-1:
-                    self.create_line(left_space+dx*x, end_upper_vert-draw_generation[x]*length_upper_vert, left_space+dx*(
-                        x+1), end_upper_vert-draw_generation[x+1]*length_upper_vert, tag="seed_graph", width=1.5, fill=fill)
-
-            scale /= 2
-
-    def refresh_view(self, event):
-        if event.keysym == "space":
-            self._change_state(True)
-        elif event.keysym == "Right":
-            self._perlin_noise.change_octave_count(1)
-            self._change_state(False)
-        elif event.keysym == "Left":
-            self._perlin_noise.change_octave_count(-1)
-            self._change_state(False)
-        elif event.keysym == "Up":
-            self._perlin_noise.change_seed_length(1)
-            self._change_state(True)
-        elif event.keysym == "Down":
-            self._perlin_noise.change_seed_length(-1)
-            self._change_state(True)
-
-    def _change_state(self, reset):
-        self.delete("seed_graph")
-        if reset:
-            self._seed = self._perlin_noise.generate_seed()
-        self.create_seed_graph()
+                    self.create_line(self._left_space+dx*x, self._end_upper_vert-generations[octave][x]*self._length_upper_vert, self._left_space+dx*(
+                        x+1), self._end_upper_vert-generations[octave][x+1]*self._length_upper_vert, tag="terrain", width=1.5, fill=self._seed_fill)
