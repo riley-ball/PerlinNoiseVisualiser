@@ -5,7 +5,7 @@ PerlinNoiseVisualiser is an application that visually describes the process of a
 ## Usage
 
 - Run main.py
-- 'pace' to generate a new seed
+- 'space' to generate a new seed
 - 'u' and 'j' to increase/decrease the number of octaves respectively
 - 'i'and'k' to increase/decrease the seed length respectively
 - 'o'and'l' to increase/decrease the scaling factor respectively
