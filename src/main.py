@@ -36,9 +36,12 @@ class PerlinNoise(object):
         if change == 1:
             if 2**self._octave_count < self._seed_length:
                 self._octave_count += 1
+                return True
         else:
             if self._octave_count > 1:
                 self._octave_count -= 1
+                return True
+        return False
 
     def change_scaling_factor(self, change):
         '''
@@ -158,11 +161,15 @@ class App(object):
             self._perlin_noise.generate_octaves()
             self._refresh_terrain()
         elif event.keysym == "u":
-            self._perlin_noise.change_octave_count(1)
-            self._refresh_terrain()
+            if self._perlin_noise.change_octave_count(1):
+                print("change 1")
+                self._view.refresh_octaves(
+                    self._perlin_noise.get_seed_length(), self._perlin_noise.get_octaves(), self._perlin_noise.get_octave_count(), 1)
         elif event.keysym == "j":
-            self._perlin_noise.change_octave_count(-1)
-            self._refresh_terrain()
+            if self._perlin_noise.change_octave_count(-1):
+                print("change -1")
+                self._view.refresh_octaves(
+                    self._perlin_noise.get_seed_length(), self._perlin_noise.get_octaves(), self._perlin_noise.get_octave_count(), -1)
         elif event.keysym == "i":
             self._perlin_noise.change_seed_length(1)
             self._refresh_seed()
@@ -198,6 +205,7 @@ def main():
     root.config(bg="#ffe6f9")
     w, h = root.winfo_screenwidth(), root.winfo_screenheight()
     root.state('zoomed')
+    # root.attributes("-fullscreen", True)
     app = App(root, w, h)
     root.title("PerlinNoiseVisualiser")
     root.mainloop()

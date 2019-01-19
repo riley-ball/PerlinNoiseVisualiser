@@ -76,7 +76,10 @@ class AppView(tk.Canvas):
         self._dh_lower = self._length_lower_vert/5
         self._dh_upper = self._length_upper_vert/5
 
-    def draw_graph(self, perlin_noise):
+    def draw_icons(self):
+        pass
+
+    def draw_graph(self):
         self.delete("graph")
 
         # Horizontal and Vertical axes for lower
@@ -126,7 +129,7 @@ class AppView(tk.Canvas):
         generations = perlin_noise.get_octaves()
         num_octaves = perlin_noise.get_octave_count()
 
-        self.draw_graph(perlin_noise)
+        self.draw_graph()
         self.draw_seed(seed_length, seed)
         self.draw_terrain(seed_length, generations, num_octaves)
 
@@ -142,15 +145,25 @@ class AppView(tk.Canvas):
                     seed[x]*self._length_lower_vert,
                     self._left_space+self._dw_seed*(x+1), self._end_lower_vert -
                     seed[x+1]*self._length_lower_vert,
-                    tag="seed", fill=self._seed_fill, width=1.5)
+                    tag="seed", fill=self._seed_fill, width=1.5, smooth=True)
 
     def draw_terrain(self, seed_length, generations, num_octaves):
-        dx = self._length_horiz/(seed_length-1)
         self.delete("terrain")
 
         # Draw terrain to screen
+        dx = self._length_horiz/(seed_length-1)
         for octave in range(num_octaves):
             for x in range(seed_length):
                 if x != seed_length-1:
                     self.create_line(self._left_space+dx*x, self._end_upper_vert-generations[octave][x]*self._length_upper_vert, self._left_space+dx*(
-                        x+1), self._end_upper_vert-generations[octave][x+1]*self._length_upper_vert, tag="terrain", width=1.5, fill=self._seed_fill)
+                        x+1), self._end_upper_vert-generations[octave][x+1]*self._length_upper_vert, tag=("terrain", "octave-{}".format(octave)), width=1.5, fill=self._seed_fill, smooth=True)
+
+    def refresh_octaves(self, seed_length, generations, num_octaves, change):
+        if change == 1:
+            dx = self._length_horiz/(seed_length-1)
+            for x in range(seed_length):
+                if x != seed_length-1:
+                    self.create_line(self._left_space+dx*x, self._end_upper_vert-generations[num_octaves-1][x]*self._length_upper_vert, self._left_space+dx*(
+                        x+1), self._end_upper_vert-generations[num_octaves-1][x+1]*self._length_upper_vert, tag=("terrain", "octave-{}".format(num_octaves-1)), width=1.5, fill=self._seed_fill, smooth=True)
+        else:
+            self.delete("octave-{}".format(num_octaves))
